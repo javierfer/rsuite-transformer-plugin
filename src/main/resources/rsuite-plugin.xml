@@ -1,0 +1,36 @@
+<rsuite-plugin id="@pluginId@" version="@pluginVersion@ at @timeStamp@"
+	description="Transforms XML managed objects using a given XSLT file. The process also updates/inserts the output into the same container.">
+
+	<extensionProvider id="rsuite.WebService">
+		<staticWebService path="/WebContent" root="/@pluginId@" />
+		<remoteApiDefinition id="@pluginId@:webservice.transfomer" handler="com.rsicms.rsuite.transformer.webservice.TransformerWebService"/>
+	</extensionProvider>
+
+<!-- 	
+	<extensionProvider id="rsuite.ContextMenu">
+		<contextMenuRuleSet name="ditaOutputActionsID">
+			<menuItemList>
+				<menuItem id="rsuite:CCSSI2DITA2">
+					<actionName>rsuite:invokeWebservice</actionName>
+					<label>Transform CCSSI to DITA</label>
+					<property name="rsuite:icon" value="ditaTopic" />
+					<property name="remoteApiName" value="@pluginId@:webservice.transfomer" />
+					<property name="showProgressMeter" value="true" />
+					<property name="timeout" value="0" />
+					<property name="serviceParams.transform" value="rsuite:/res/plugin/rsuite_eled/xslt/ccsi2dita/CCSSI2DITA.xsl" />
+					<property name="serviceParams.output-filename-alias" value="ela-literacy-dita.dita" />
+					<property name="serviceParams.host-protocol" value="https" />
+					<property name="serviceParams.operation" value="update" />
+					<property name="rsuite:group" value="rsuite:hierarchy" />
+					<property name="rsuite:icon" value="generateXml" />
+				</menuItem>
+			</menuItemList>
+			<ruleList>
+				<rule>include elementType LearningStandards</rule>
+				<rule>exclude role Contributor</rule>
+			</ruleList>
+		</contextMenuRuleSet>
+	</extensionProvider> 
+-->
+	
+</rsuite-plugin>

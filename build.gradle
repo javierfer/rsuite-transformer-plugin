@@ -1,0 +1,21 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+apply from: 'http://ivy.reallysi.com/ivy-repo/rsuite-std-plugin-tasks.gradle'
+apply from: 'http://ivy.reallysi.com/ivy-repo/repositories-std-include.gradle'
+
+group = "rsi"
+project.buildDir = 'target'
+
+dependencies {
+	compile ('rsi:rsuite-api:5.0.4') {
+		transitive = false
+	}
+	compile("apache:commons-logging:1.1")
+	compile("apache:commons-io:1.4")
+	compile("apache:commons-lang:2.4")
+}
+
+jar {
+	baseName = 'rsuite-transformer-plugin'
+}
