@@ -17,6 +17,7 @@ Transforms XML managed objects using a given XSLT file. The process also updates
 				<property name="timeout" value="0" />
 				<property name="serviceParams.transform" value="rsuite:/res/plugin/rsuite_eled/xslt/ccsi2dita/CCSSI2DITA.xsl" />
 				<property name="serviceParams.output-filename-alias" value="ela-literacy-dita.dita" />
+				<property name="serviceParams.output-file-extension-alias" value="dita" />
 				<property name="serviceParams.host-protocol" value="https" />
 				<property name="serviceParams.operation" value="update" />
 				<property name="rsuite:group" value="rsuite:hierarchy" />
@@ -33,7 +34,8 @@ Transforms XML managed objects using a given XSLT file. The process also updates
 
 ## Parameters
 * serviceParams.transform: (required) Path in the plugin to the transform.
-* serviceParams.output-filename-alias: (required) File name alias for the generated output.
+* serviceParams.output-filename-alias: (optional) File name alias for the generated output. If not provided, the file name will be the same as the source.
+* serviceParams.output-file-extension-alias: (optional) File extension for the generated output. If not provided, the file name extension will be the same as the source.
 * serviceParams.host-protocol: (optional) http/https (default "http"). Used to build the url to pass the "rsuite.serverurl" XSLT parameter to the transform. Additionally, "rsuite.sessionkey" and "rsuite.username" are passed.
 * serviceParams.operation: (optional) See "Operations supported" (default "update").
 
@@ -72,5 +74,4 @@ if (remoteApiResult.getResponseStatus() != ResponseStatus.SUCCESS) {
 Note that each XSLT parameter key must start with "XSLT_PARAM_".
 
 ## Potential improvements
-* When no "serviceParams.output-filename-alias" parameter is set, use the source MO alias, plus a suffix.
 * Ability to transform all the MOs from a given content assembly.

@@ -4,14 +4,10 @@ import static com.rsicms.rsuite.TransformerConstants.*;
 import static com.rsicms.rsuite.transformer.utils.MOUtils.*;
 import static org.apache.commons.lang.StringUtils.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.commons.lang.StringUtils;
-
-import com.reallysi.rsuite.api.ManagedObject;
-import com.reallysi.rsuite.api.RSuiteException;
-import com.reallysi.rsuite.api.remoteapi.RemoteApiExecutionContext;
+import com.reallysi.rsuite.api.*;
+import com.reallysi.rsuite.api.remoteapi.*;
 
 public class TransformerService {
 
@@ -38,6 +34,7 @@ public class TransformerService {
 					caMo, 
 					parameters.get(TRANSFORM),
 					parameters.get(OUTPUT_FILENAME_ALIAS),
+					parameters.get(OUTPUT_FILE_EXTENSION_ALIAS),
 					parameters.get(HOST_PROTOCOL),
 					xsltParams);
 		} else if (OPERATION_UPDATE.equalsIgnoreCase(operation)) {
@@ -48,6 +45,7 @@ public class TransformerService {
 					caMo, 
 					parameters.get(TRANSFORM),
 					parameters.get(OUTPUT_FILENAME_ALIAS),
+					parameters.get(OUTPUT_FILE_EXTENSION_ALIAS),
 					parameters.get(HOST_PROTOCOL),
 					xsltParams);
 			

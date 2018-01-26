@@ -52,9 +52,6 @@ public class TransformerWebService extends RemoteApiHandlerBase {
 		if (isEmpty(args.getFirstString(TRANSFORM)))
 			throw new RSuiteException(format("No '%s' parameter found.", TRANSFORM));
 		
-		if (isEmpty(args.getFirstString(OUTPUT_FILENAME_ALIAS)))
-			throw new RSuiteException(format("No '%s' parameter found.", OUTPUT_FILENAME_ALIAS));
-		
 		if (isEmpty(args.getFirstString(OPERATION))) {
 			log.warn(format("No %s specified. Default is '%s'", OPERATION, OPERATION_UPDATE));
 			args.getValuesMap().put(OPERATION, OPERATION_UPDATE);

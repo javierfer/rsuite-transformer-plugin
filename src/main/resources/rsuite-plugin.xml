@@ -18,7 +18,8 @@
 					<property name="showProgressMeter" value="true" />
 					<property name="timeout" value="0" />
 					<property name="serviceParams.transform" value="rsuite:/res/plugin/rsuite_eled/xslt/ccsi2dita/CCSSI2DITA.xsl" />
-					<property name="serviceParams.output-filename-alias" value="ela-literacy-dita.dita" />
+					<property name="serviceParams.output-filename-alias" value="ela-literacy-dita" />
+					<property name="serviceParams.output-file-extension-alias" value="dita" />
 					<property name="serviceParams.host-protocol" value="https" />
 					<property name="serviceParams.operation" value="update" />
 					<property name="rsuite:group" value="rsuite:hierarchy" />

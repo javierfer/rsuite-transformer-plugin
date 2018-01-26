@@ -14,16 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.reallysi.rsuite.api.ContentAssemblyItem;
-import com.reallysi.rsuite.api.ContentAssemblyNodeContainer;
-import com.reallysi.rsuite.api.ManagedObject;
-import com.reallysi.rsuite.api.ManagedObjectReference;
-import com.reallysi.rsuite.api.ObjectType;
-import com.reallysi.rsuite.api.RSuiteException;
-import com.reallysi.rsuite.api.Session;
-import com.reallysi.rsuite.api.User;
-import com.reallysi.rsuite.api.ValidationException;
-import com.reallysi.rsuite.api.VersionType;
+import com.reallysi.rsuite.api.*;
 import com.reallysi.rsuite.api.control.NonXmlObjectSource;
 import com.reallysi.rsuite.api.control.ObjectAttachOptions;
 import com.reallysi.rsuite.api.control.ObjectCheckInOptions;
@@ -110,6 +101,22 @@ private MOUtils() {}
 		return null;
 	}
 	
+	public static String getMoFileNameAlias(ExecutionContext context, User user, ManagedObject mo) throws RSuiteException {
+		ManagedObjectService moService = context.getManagedObjectService();
+		AliasHelper aliasHelper = moService.getAliasHelper();
+		return aliasHelper.getFilename(user, mo);
+	}
+
+	public static String getMoBaseNameAlias(ExecutionContext context, User user, ManagedObject mo) throws RSuiteException {
+		Alias[] aliases = mo.getAliases("basename");
+		String basename = StringUtils.EMPTY;
+
+		if (aliases != null && aliases.length > 0) {
+			basename = aliases[0].getText();
+		}
+		return basename;
+	}
+
 	public static void insertAndAttach(ExecutionContext context, User user, ManagedObject caMo, String fileName,
 			ObjectSource objectSource) throws RSuiteException {
 		ManagedObjectService moService = context.getManagedObjectService();
@@ -130,6 +137,7 @@ private MOUtils() {}
 			ManagedObject caMo,
 			String xslUri,
 			String fileName,
+			String fileExtension,
 			String protocol,
 			Map<String, String> xslParams) throws RSuiteException {
 		User user = session.getUser();
@@ -157,8 +165,12 @@ private MOUtils() {}
 				transformResult, 
 				StandardCharsets.UTF_8.name());
 			
-			if (isEmpty(fileName)) {
-				fileName = "transform.xml";
+			if (isBlank(fileName)) {
+				fileName = getMoBaseNameAlias(context, user, mo);
+			}
+
+			if (isBlank(fileExtension)) {
+				fileExtension = FilenameUtils.getExtension(getMoFileNameAlias(context, user, mo));
 			}
 			
 			insertAndAttach(context, user, caMo, fileName, objectSource);
@@ -182,6 +194,7 @@ private MOUtils() {}
 			ManagedObject caMo,
 			String xslUri,
 			String fileName,
+			String fileExtension,
 			String protocol,
 			Map<String, String> xslParams) throws RSuiteException {
 		User user = session.getUser();
@@ -208,11 +221,15 @@ private MOUtils() {}
 				"file.xml", // Only the file extension matters here. 
 				transformResult, 
 				StandardCharsets.UTF_8.name());
-			
-			if (isEmpty(fileName)) {
-				fileName = "transform.xml";
+
+			if (isBlank(fileName)) {
+				fileName = getMoBaseNameAlias(context, user, mo);
 			}
-			
+
+			if (isBlank(fileExtension)) {
+				fileExtension = FilenameUtils.getExtension(getMoFileNameAlias(context, user, mo));
+			}
+
 			ContentAssemblyNodeContainer caContainer = 
 					RSuiteUtils.getContentAssemblyNodeContainer(context, user, caMo.getId());
 			ManagedObject existingMo = 
