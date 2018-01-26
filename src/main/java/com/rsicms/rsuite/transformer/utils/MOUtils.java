@@ -4,29 +4,20 @@ import static com.reallysi.rsuite.api.ObjectType.*;
 import static com.reallysi.rsuite.api.RSuiteException.*;
 import static org.apache.commons.lang.StringUtils.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.*;
+import java.util.*;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.*;
+import org.apache.commons.lang.*;
 
 import com.reallysi.rsuite.api.*;
-import com.reallysi.rsuite.api.control.NonXmlObjectSource;
-import com.reallysi.rsuite.api.control.ObjectAttachOptions;
-import com.reallysi.rsuite.api.control.ObjectCheckInOptions;
-import com.reallysi.rsuite.api.control.ObjectInsertOptions;
-import com.reallysi.rsuite.api.control.ObjectSource;
-import com.reallysi.rsuite.api.control.ObjectUpdateOptions;
-import com.reallysi.rsuite.api.control.XmlObjectSource;
-import com.reallysi.rsuite.api.extensions.ExecutionContext;
-import com.reallysi.rsuite.api.tools.AliasHelper;
-import com.reallysi.rsuite.service.ContentAssemblyService;
-import com.reallysi.rsuite.service.ManagedObjectService;
-import com.rsicms.rsuite.helpers.utils.RSuiteUtils;
+import com.reallysi.rsuite.api.control.*;
+import com.reallysi.rsuite.api.extensions.*;
+import com.reallysi.rsuite.api.tools.*;
+import com.reallysi.rsuite.service.*;
+import com.rsicms.rsuite.helpers.utils.*;
 
 public class MOUtils {
 	
@@ -53,7 +44,7 @@ private MOUtils() {}
 	
 	public static ObjectSource getObjectSource(
 			ExecutionContext context,
-			String filename,
+			User user, String filename,
 			InputStream content,
 			String encoding) 
 	throws IOException {
@@ -62,17 +53,36 @@ private MOUtils() {}
 				FilenameUtils.getExtension(filename))) {
 			return new XmlObjectSource(data, encoding);
 		} else {
-			return new NonXmlObjectSource(data);
+			/* ManageableObjectService#update() NPE when using byte arrays. Only files work. */
+			File tmpDir = context.getRSuiteServerConfiguration().getTmpDir();
+			File outputDir = new File(tmpDir, user.getUserId());
+			outputDir.mkdirs();
+			File tmpFile = new File(outputDir, filename);
+			FileUtils.writeByteArrayToFile(tmpFile,  data);
+
+			return new NonXmlObjectSource(tmpFile);
 		}
 	}
 	
-	public static void updateAndCheckIn(User user, ManagedObjectService moService, ObjectSource objectSource,
+	public static void updateAndCheckIn(ExecutionContext context, User user, ManagedObjectService moService, ObjectSource objectSource,
 			ManagedObject existingMo, String versionNote) throws RSuiteException, ValidationException {
+		ObjectUpdateOptions options = new ObjectUpdateOptions();
+
+		String fileName = getMoFileNameAlias(context, user, existingMo);
+		options.setExternalFileName(fileName);
+
+		if (!objectSource.isXml())
+			options.setDisplayName(fileName);
+
+		String contentType = context.getConfigurationService().getMimeMappingCatalog()
+				.getMimeTypeByExtension(FilenameUtils.getExtension(fileName));
+		options.setContentType(contentType);
+
 		moService.update(
 				user, 
 				existingMo.getId(), 
 				objectSource,
-				new ObjectUpdateOptions());
+				options);
 			
 		// Check in the MO
 		ObjectCheckInOptions checkInOptions = new ObjectCheckInOptions();
@@ -121,12 +131,21 @@ private MOUtils() {}
 			ObjectSource objectSource) throws RSuiteException {
 		ManagedObjectService moService = context.getManagedObjectService();
 		ContentAssemblyService caService = context.getContentAssemblyService();
-		
-		ObjectInsertOptions options = 
-				new ObjectInsertOptions(fileName, new String[0], new String[0], true);
-		
+
+		ObjectInsertOptions options = new ObjectInsertOptions(fileName, new String[0], new String[0],
+				objectSource.isXml(), objectSource.isXml());
+
+		options.setFileName(fileName);
+
+		if (!objectSource.isXml())
+			options.setDisplayName(fileName);
+
+		String contentType = context.getConfigurationService().getMimeMappingCatalog()
+				.getMimeTypeByExtension(FilenameUtils.getExtension(fileName));
+		options.setContentType(contentType);
+
 		ManagedObject topic = moService.load(user, objectSource, options);
-		
+
 		caService.attach(user, caMo.getId(), topic, new ObjectAttachOptions());
 	}
 
@@ -136,7 +155,7 @@ private MOUtils() {}
 			ManagedObject mo,
 			ManagedObject caMo,
 			String xslUri,
-			String fileName,
+			String fileBaseName,
 			String fileExtension,
 			String protocol,
 			Map<String, String> xslParams) throws RSuiteException {
@@ -157,43 +176,46 @@ private MOUtils() {}
 				context.getXmlApiManager().getTransformer(new URI(xslUri)),
 				protocol,
 				xslParams);
-			
-			// Update the MO
-			ObjectSource objectSource = getObjectSource(
-				context, 
-				"file.xml", // Only the file extension matters here. 
-				transformResult, 
-				StandardCharsets.UTF_8.name());
-			
-			if (isBlank(fileName)) {
-				fileName = getMoBaseNameAlias(context, user, mo);
+
+			if (isBlank(fileBaseName)) {
+				fileBaseName = getMoBaseNameAlias(context, user, mo);
 			}
 
 			if (isBlank(fileExtension)) {
 				fileExtension = FilenameUtils.getExtension(getMoFileNameAlias(context, user, mo));
 			}
-			
+
+			String fileName = fileBaseName + "." + fileExtension;
+
+			// Update the MO
+			ObjectSource objectSource = getObjectSource(
+				context,
+				user,
+				fileName, 
+				transformResult, 
+				StandardCharsets.UTF_8.name());
+
 			insertAndAttach(context, user, caMo, fileName, objectSource);
-	
+
 			if (createdCheckOut && moService.isCheckedOutAuthor(user, mo.getId())) {
 				moService.undoCheckout(user, mo.getId());
 			}
 		} catch(Exception e) {
 			throw new RSuiteException(ERROR_OBJECT_INSERT_ERR,
 					"Transformation and Insert error: " + e.getMessage(), e);
-			
+
 		} finally {
 			IOUtils.closeQuietly(transformResult);
 		}
 	}
-	
+
 	public static void applyTransformAndUpdate(
 			ExecutionContext context,
 			Session session,
 			ManagedObject mo,
 			ManagedObject caMo,
 			String xslUri,
-			String fileName,
+			String fileBaseName,
 			String fileExtension,
 			String protocol,
 			Map<String, String> xslParams) throws RSuiteException {
@@ -214,21 +236,24 @@ private MOUtils() {}
 				context.getXmlApiManager().getTransformer(new URI(xslUri)),
 				protocol,
 				xslParams);
-			
-			// Update the MO
-			ObjectSource objectSource = getObjectSource(
-				context, 
-				"file.xml", // Only the file extension matters here. 
-				transformResult, 
-				StandardCharsets.UTF_8.name());
 
-			if (isBlank(fileName)) {
-				fileName = getMoBaseNameAlias(context, user, mo);
+			if (isBlank(fileBaseName)) {
+				fileBaseName = getMoBaseNameAlias(context, user, mo);
 			}
-
+			
 			if (isBlank(fileExtension)) {
 				fileExtension = FilenameUtils.getExtension(getMoFileNameAlias(context, user, mo));
 			}
+
+			String fileName = fileBaseName + "." + fileExtension;
+
+			// Update the MO
+			ObjectSource objectSource = getObjectSource(
+				context,
+				user,
+				fileName, 
+				transformResult, 
+				StandardCharsets.UTF_8.name());
 
 			ContentAssemblyNodeContainer caContainer = 
 					RSuiteUtils.getContentAssemblyNodeContainer(context, user, caMo.getId());
@@ -238,7 +263,7 @@ private MOUtils() {}
 			if (existingMo != null) {
 				boolean existinMoCheckOut = checkout(context, user, existingMo.getId());
 				// update
-				updateAndCheckIn(user, moService, objectSource, existingMo, "MO transformed.");
+				updateAndCheckIn(context, user, moService, objectSource, existingMo, "MO transformed.");
 
 				if (existinMoCheckOut && moService.isCheckedOutAuthor(user, existingMo.getId())) {
 					moService.undoCheckout(user, existingMo.getId());
@@ -287,11 +312,12 @@ private MOUtils() {}
 			// Update the MO
 			ObjectSource objectSource = getObjectSource(
 				context, 
+				user,
 				"file.xml", // Only the file extension matters here. 
 				transformResult, 
 				StandardCharsets.UTF_8.name());
 			
-			updateAndCheckIn(user, moService, objectSource, mo, "MO transformed.");
+			updateAndCheckIn(context, user, moService, objectSource, mo, "MO transformed.");
 
 			if (createdCheckOut && moService.isCheckedOutAuthor(user, mo.getId())) {
 				moService.undoCheckout(user, mo.getId());
