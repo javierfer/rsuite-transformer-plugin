@@ -5,6 +5,7 @@ public class TransformerConstants {
 	public static final String TRANSFORM = "transform";
 	public static final String OUTPUT_FILENAME_ALIAS = "output-filename-alias";
 	public static final String OUTPUT_FILE_EXTENSION_ALIAS = "output-file-extension-alias";
+	public static final String OUTPUT_FILE_PREFIX_ALIAS = "output-file-prefix-alias";
 	
 	public static final String OPERATION = "operation";
 	public static final String OPERATION_UPDATE = "update";

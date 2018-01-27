@@ -157,6 +157,7 @@ private MOUtils() {}
 			String xslUri,
 			String fileBaseName,
 			String fileExtension,
+			String filePrefix,
 			String protocol,
 			Map<String, String> xslParams) throws RSuiteException {
 		User user = session.getUser();
@@ -185,7 +186,9 @@ private MOUtils() {}
 				fileExtension = FilenameUtils.getExtension(getMoFileNameAlias(context, user, mo));
 			}
 
-			String fileName = fileBaseName + "." + fileExtension;
+			filePrefix = StringUtils.defaultString(filePrefix);
+
+			String fileName = filePrefix + fileBaseName + "." + fileExtension;
 
 			// Update the MO
 			ObjectSource objectSource = getObjectSource(
@@ -217,6 +220,7 @@ private MOUtils() {}
 			String xslUri,
 			String fileBaseName,
 			String fileExtension,
+			String filePrefix,
 			String protocol,
 			Map<String, String> xslParams) throws RSuiteException {
 		User user = session.getUser();
@@ -245,7 +249,9 @@ private MOUtils() {}
 				fileExtension = FilenameUtils.getExtension(getMoFileNameAlias(context, user, mo));
 			}
 
-			String fileName = fileBaseName + "." + fileExtension;
+			filePrefix = StringUtils.defaultString(filePrefix);
+
+			String fileName = filePrefix + fileBaseName + "." + fileExtension;
 
 			// Update the MO
 			ObjectSource objectSource = getObjectSource(

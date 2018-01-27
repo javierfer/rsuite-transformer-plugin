@@ -35,6 +35,7 @@ public class TransformerService {
 					parameters.get(TRANSFORM),
 					parameters.get(OUTPUT_FILENAME_ALIAS),
 					parameters.get(OUTPUT_FILE_EXTENSION_ALIAS),
+					parameters.get(OUTPUT_FILE_PREFIX_ALIAS),
 					parameters.get(HOST_PROTOCOL),
 					xsltParams);
 		} else if (OPERATION_UPDATE.equalsIgnoreCase(operation)) {
@@ -46,6 +47,7 @@ public class TransformerService {
 					parameters.get(TRANSFORM),
 					parameters.get(OUTPUT_FILENAME_ALIAS),
 					parameters.get(OUTPUT_FILE_EXTENSION_ALIAS),
+					parameters.get(OUTPUT_FILE_PREFIX_ALIAS),
 					parameters.get(HOST_PROTOCOL),
 					xsltParams);
 			

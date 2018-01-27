@@ -18,10 +18,10 @@ Transforms XML managed objects using a given XSLT file. The process also updates
 				<property name="serviceParams.transform" value="rsuite:/res/plugin/rsuite_eled/xslt/ccsi2dita/CCSSI2DITA.xsl" />
 				<property name="serviceParams.output-filename-alias" value="ela-literacy-dita.dita" />
 				<property name="serviceParams.output-file-extension-alias" value="dita" />
+				<property name="serviceParams.output-file-prefix-alias" value="test_" />
 				<property name="serviceParams.host-protocol" value="https" />
 				<property name="serviceParams.operation" value="update" />
 				<property name="rsuite:group" value="rsuite:hierarchy" />
-				<property name="rsuite:icon" value="generateXml" />
 			</menuItem>
 		</menuItemList>
 		<ruleList>
@@ -36,6 +36,7 @@ Transforms XML managed objects using a given XSLT file. The process also updates
 * serviceParams.transform: (required) Path in the plugin to the transform.
 * serviceParams.output-filename-alias: (optional) File name alias for the generated output. If not provided, the file name will be the same as the source.
 * serviceParams.output-file-extension-alias: (optional) File extension for the generated output. If not provided, the file name extension will be the same as the source.
+* serviceParams.output-file-prefix-alias: (optional) File base name alias prefix for the generated output.
 * serviceParams.host-protocol: (optional) http/https (default "http"). Used to build the url to pass the "rsuite.serverurl" XSLT parameter to the transform. Additionally, "rsuite.sessionkey" and "rsuite.username" are passed.
 * serviceParams.operation: (optional) See "Operations supported" (default "update").
 
