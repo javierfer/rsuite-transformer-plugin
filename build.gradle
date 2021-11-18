@@ -1,12 +1,32 @@
 apply from: 'http://ivy.reallysi.com/ivy-repo/orbis-std.gradle'
 
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    ivy {
+        url 'http://ivy.reallysi.com/ivy-repo/'
+        layout 'pattern', {
+            artifact "[organisation]/[module]/[module]-[revision].[ext]"
+        }
+        metadataSources { artifact() }
+    }
+    mavenCentral()
+    maven {
+        url "http://gradle.artifactoryonline.com/gradle/libs"    //added to resolve jms 1.1
+        url "https://us5.rsuitecms.com/rsuite_artifactory/libs-release-local"
+    }
+}
+
 dependencies {
-	compile ('rsi:rsuite-api:5.3.0') {
+	compile ('rsi:rsuite-api:6.4.0') {
 		transitive = false
 	}
 	compile("apache:commons-logging:1.1")
 	compile("apache:commons-io:1.4")
 	compile("apache:commons-lang:2.4")
+	compile("saxonica:saxon10-ee:10.3")
 }
 
 jar {

@@ -1,23 +1,44 @@
 package com.rsicms.rsuite.transformer.utils;
 
-import static com.reallysi.rsuite.api.ObjectType.*;
-import static com.reallysi.rsuite.api.RSuiteException.*;
-import static org.apache.commons.lang.StringUtils.*;
+import static com.reallysi.rsuite.api.ObjectType.MANAGED_OBJECT_REF;
+import static com.reallysi.rsuite.api.RSuiteException.ERROR_OBJECT_INSERT_ERR;
+import static com.reallysi.rsuite.api.RSuiteException.ERROR_OBJECT_UPDATE_ERR;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
-import org.apache.commons.io.*;
-import org.apache.commons.lang.*;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
-import com.reallysi.rsuite.api.*;
-import com.reallysi.rsuite.api.control.*;
-import com.reallysi.rsuite.api.extensions.*;
-import com.reallysi.rsuite.api.tools.*;
-import com.reallysi.rsuite.service.*;
-import com.rsicms.rsuite.helpers.utils.*;
+import com.reallysi.rsuite.api.Alias;
+import com.reallysi.rsuite.api.ContentAssemblyItem;
+import com.reallysi.rsuite.api.ContentAssemblyNodeContainer;
+import com.reallysi.rsuite.api.ManagedObject;
+import com.reallysi.rsuite.api.ManagedObjectReference;
+import com.reallysi.rsuite.api.ObjectType;
+import com.reallysi.rsuite.api.RSuiteException;
+import com.reallysi.rsuite.api.Session;
+import com.reallysi.rsuite.api.User;
+import com.reallysi.rsuite.api.ValidationException;
+import com.reallysi.rsuite.api.VersionType;
+import com.reallysi.rsuite.api.control.NonXmlObjectSource;
+import com.reallysi.rsuite.api.control.ObjectAttachOptions;
+import com.reallysi.rsuite.api.control.ObjectCheckInOptions;
+import com.reallysi.rsuite.api.control.ObjectInsertOptions;
+import com.reallysi.rsuite.api.control.ObjectSource;
+import com.reallysi.rsuite.api.control.ObjectUpdateOptions;
+import com.reallysi.rsuite.api.control.XmlObjectSource;
+import com.reallysi.rsuite.api.extensions.ExecutionContext;
+import com.reallysi.rsuite.api.tools.AliasHelper;
+import com.reallysi.rsuite.service.ContentAssemblyService;
+import com.reallysi.rsuite.service.ManagedObjectService;
+import com.rsicms.rsuite.helpers.utils.RSuiteUtils;
 
 public class MOUtils {
 	
@@ -173,8 +194,8 @@ private MOUtils() {}
 			transformResult = DomUtils.transform(
 				context, 
 				session, 
-				mo.getElement().getOwnerDocument(), 
-				context.getXmlApiManager().getTransformer(new URI(xslUri)),
+				mo,
+				xslUri,
 				protocol,
 				xslParams);
 
@@ -231,13 +252,13 @@ private MOUtils() {}
 			
 			// Make sure the user has the check out.
 			createdCheckOut = checkout(context, user, mo.getId());
-			
+
 			// Perform transform
 			transformResult = DomUtils.transform(
 				context, 
-				session, 
-				mo.getElement().getOwnerDocument(), 
-				context.getXmlApiManager().getTransformer(new URI(xslUri)),
+				session,
+				mo,
+				xslUri,
 				protocol,
 				xslParams);
 
@@ -310,8 +331,8 @@ private MOUtils() {}
 			transformResult = DomUtils.transform(
 				context, 
 				session, 
-				mo.getElement().getOwnerDocument(), 
-				context.getXmlApiManager().getTransformer(new URI(xslUri)),
+				mo,
+				xslUri,
 				protocol,
 				xslParams);
 			

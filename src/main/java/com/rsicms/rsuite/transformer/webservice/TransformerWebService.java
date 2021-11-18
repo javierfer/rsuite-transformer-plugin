@@ -30,8 +30,12 @@ public class TransformerWebService extends RemoteApiHandlerBase {
 
 		User user = context.getSession().getUser();
 		ManagedObject ref = args.getFirstManagedObject(user);
-		ManagedObject caMo = context.getManagedObjectService()
-				.getParentManagedObject(user, ref);
+
+		ManagedObject moref = context.getManagedObjectService().getManagedObject(user,
+				ref.getDirectReferenceIds().get(0));
+
+		ManagedObject caMo = context.getManagedObjectService().getManagedObject(user, moref.getAncestorMoTypeIds()[0]);
+
 		ManagedObject mo = RSuiteUtils.getRealMo(context, user, ref);
 
 		TransformerService service = new TransformerService(context);
@@ -48,10 +52,10 @@ public class TransformerWebService extends RemoteApiHandlerBase {
 	}
 
 	private void validateParameters(CallArgumentList args) throws RSuiteException {
-		
+
 		if (isEmpty(args.getFirstString(TRANSFORM)))
 			throw new RSuiteException(format("No '%s' parameter found.", TRANSFORM));
-		
+
 		if (isEmpty(args.getFirstString(OPERATION))) {
 			log.warn(format("No %s specified. Default is '%s'", OPERATION, OPERATION_UPDATE));
 			args.getValuesMap().put(OPERATION, OPERATION_UPDATE);
